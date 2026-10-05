@@ -1,0 +1,447 @@
+import React, { useEffect } from 'react';
+import confetti from 'canvas-confetti';
+import {
+  FinalAssessmentReport,
+  RecommendationType,
+} from '../types/interview';
+import {
+  CheckCircle2,
+  AlertTriangle,
+  BookOpen,
+  Printer,
+  Copy,
+  RotateCcw,
+  Sparkles,
+  Target,
+  Layers,
+  Calendar,
+  Briefcase,
+  User,
+  ShieldCheck,
+  TrendingUp,
+  Cpu,
+} from 'lucide-react';
+
+interface FinalReportProps {
+  report: FinalAssessmentReport;
+  onRetake: () => void;
+  onCopySummary: () => void;
+}
+
+export const FinalReport: React.FC<FinalReportProps> = ({
+  report,
+  onRetake,
+  onCopySummary,
+}) => {
+  // Fire confetti on load if Hire or Strong Hire
+  useEffect(() => {
+    if (report.finalRecommendation === 'Strong Hire' || report.finalRecommendation === 'Hire') {
+      try {
+        confetti({
+          particleCount: 80,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
+      } catch (e) {
+        console.warn('Confetti effect ignored:', e);
+      }
+    }
+  }, [report.finalRecommendation]);
+
+  const getRecommendationBadge = (rec: RecommendationType) => {
+    switch (rec) {
+      case 'Strong Hire':
+        return {
+          bg: 'bg-emerald-500/15 border-emerald-500 text-emerald-300',
+          dot: 'bg-emerald-400',
+          desc: 'Exemplary technical depth, algorithmic clarity, and communication across all evaluated competencies.'
+        };
+      case 'Hire':
+        return {
+          bg: 'bg-indigo-500/15 border-indigo-500 text-indigo-300',
+          dot: 'bg-indigo-400',
+          desc: 'Solid foundational competencies and problem-solving skills meeting standard engineering hiring bar.'
+        };
+      case 'Borderline':
+        return {
+          bg: 'bg-amber-500/15 border-amber-500 text-amber-300',
+          dot: 'bg-amber-400',
+          desc: 'Demonstrates baseline potential but exhibits inconsistent technical depth in core domain areas.'
+        };
+      case 'Needs Improvement':
+        return {
+          bg: 'bg-rose-500/15 border-rose-500 text-rose-300',
+          dot: 'bg-rose-400',
+          desc: 'Significant conceptual gaps observed in fundamentals. Requires targeted study before re-evaluation.'
+        };
+    }
+  };
+
+  const recConfig = getRecommendationBadge(report.finalRecommendation);
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  return (
+    <div className="max-w-5xl mx-auto py-8 px-4 animate-fade-in">
+      {/* Top Controls: Print, Copy, Retake (hidden in print) */}
+      <div className="no-print flex flex-wrap items-center justify-between gap-3 mb-6 p-4 glass-card rounded-2xl border border-slate-800">
+        <div className="flex items-center space-x-2 text-xs text-slate-300">
+          <Sparkles className="h-4 w-4 text-brand-400" />
+          <span>Evaluation session finalized. You can print or download this candidate dossier.</span>
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={onCopySummary}
+            className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs font-medium text-slate-300 hover:text-white transition-colors flex items-center space-x-1.5"
+          >
+            <Copy className="h-3.5 w-3.5" />
+            <span>Copy Summary</span>
+          </button>
+
+          <button
+            onClick={handlePrint}
+            className="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs font-medium text-slate-300 hover:text-white transition-colors flex items-center space-x-1.5"
+          >
+            <Printer className="h-3.5 w-3.5" />
+            <span>Print / PDF</span>
+          </button>
+
+          <button
+            onClick={onRetake}
+            className="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-xs font-semibold text-white shadow-lg shadow-brand-500/20 transition-all flex items-center space-x-1.5"
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+            <span>New Interview</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Main Dossier Container */}
+      <div className="glass-card rounded-3xl p-6 sm:p-10 border border-slate-800 shadow-2xl space-y-10">
+        {/* Document Header */}
+        <div className="border-b border-slate-800 pb-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div>
+            <div className="flex items-center space-x-2 text-xs font-semibold uppercase tracking-wider text-brand-400 mb-1">
+              <ShieldCheck className="h-4 w-4" />
+              <span>Official Technical Assessment Report</span>
+            </div>
+            <h1 className="text-3xl sm:text-4xl font-extrabold text-white font-['Plus_Jakarta_Sans']">
+              Interview Evaluation Dossier
+            </h1>
+            <p className="text-sm text-slate-400 mt-1">
+              Generated by InterviewPilot AI Assessment Engine
+            </p>
+          </div>
+
+          {/* Candidate Meta Info */}
+          <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 text-xs space-y-2 min-w-[260px]">
+            <div className="flex items-center justify-between">
+              <span className="text-slate-400 flex items-center space-x-1.5">
+                <User className="h-3.5 w-3.5 text-brand-400" />
+                <span>Candidate:</span>
+              </span>
+              <span className="text-white font-bold">{report.candidateName}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-slate-400 flex items-center space-x-1.5">
+                <Briefcase className="h-3.5 w-3.5 text-brand-400" />
+                <span>Target Role:</span>
+              </span>
+              <span className="text-slate-200 font-medium">{report.targetRole}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-slate-400 flex items-center space-x-1.5">
+                <Calendar className="h-3.5 w-3.5 text-brand-400" />
+                <span>Date:</span>
+              </span>
+              <span className="text-slate-400 font-mono">{report.date}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Hero Score & Recommendation Banner */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Overall Score Dial */}
+          <div className="glass-card rounded-2xl p-6 border border-slate-800 flex flex-col items-center justify-center text-center">
+            <span className="text-xs uppercase font-bold tracking-wider text-slate-400 mb-2">
+              Overall Candidate Score
+            </span>
+            <div className="relative my-2 flex items-center justify-center">
+              <div className="h-32 w-32 rounded-full border-4 border-slate-800 flex items-center justify-center bg-slate-900/50">
+                <div className="text-center">
+                  <span className="text-4xl sm:text-5xl font-black font-mono text-white tracking-tight">
+                    {report.overallScore}
+                  </span>
+                  <span className="block text-[11px] font-semibold text-slate-400">/ 100</span>
+                </div>
+              </div>
+            </div>
+            <p className="text-xs text-slate-400 mt-2">
+              {report.overallScore >= 80 ? 'Mastery Tier' : report.overallScore >= 65 ? 'Proficient Tier' : 'Foundation Tier'}
+            </p>
+          </div>
+
+          {/* Hiring Committee Recommendation */}
+          <div className="md:col-span-2 glass-card rounded-2xl p-6 border border-slate-800 flex flex-col justify-between">
+            <div>
+              <span className="text-xs uppercase font-bold tracking-wider text-slate-400 mb-2 block">
+                Final Hiring Committee Recommendation
+              </span>
+              <div className="flex items-center space-x-3 mb-3">
+                <div className={`px-4 py-2 rounded-xl border text-sm sm:text-base font-extrabold flex items-center space-x-2 ${recConfig.bg}`}>
+                  <span className={`w-2.5 h-2.5 rounded-full ${recConfig.dot}`}></span>
+                  <span>{report.finalRecommendation}</span>
+                </div>
+              </div>
+              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed mb-4">
+                {recConfig.desc}
+              </p>
+            </div>
+
+            {/* Executive Summary Quote */}
+            <div className="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 text-xs text-slate-300 italic">
+              "{report.executiveSummary}"
+            </div>
+          </div>
+        </div>
+
+        {/* 3 Core Pillar Scores */}
+        <div>
+          <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400 mb-4 flex items-center space-x-2">
+            <Cpu className="h-4 w-4 text-brand-400" />
+            <span>Core Competency Pillars</span>
+          </h3>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {[
+              {
+                title: 'Technical Knowledge',
+                score: report.technicalKnowledgeScore,
+                desc: 'Architecture, language internals, and data structures'
+              },
+              {
+                title: 'Communication',
+                score: report.communicationScore,
+                desc: 'Structure, clarity, and precision of technical articulation'
+              },
+              {
+                title: 'Problem Solving',
+                score: report.problemSolvingScore,
+                desc: 'Decomposition, edge cases, and algorithmic complexity'
+              }
+            ].map((pillar) => (
+              <div key={pillar.title} className="p-5 rounded-2xl bg-slate-900 border border-slate-800">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-semibold text-slate-300">{pillar.title}</span>
+                  <span className="text-lg font-bold font-mono text-white">{pillar.score}%</span>
+                </div>
+                <div className="w-full h-2 rounded-full bg-slate-800 overflow-hidden mb-2">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-brand-500 to-indigo-400"
+                    style={{ width: `${pillar.score}%` }}
+                  />
+                </div>
+                <p className="text-[11px] text-slate-500 leading-tight">{pillar.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Skill-wise Breakdown */}
+        {report.skillScores && Object.keys(report.skillScores).length > 0 && (
+          <div>
+            <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400 mb-4 flex items-center space-x-2">
+              <Layers className="h-4 w-4 text-brand-400" />
+              <span>Skill-by-Skill Proficiency Matrix</span>
+            </h3>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {Object.entries(report.skillScores).map(([skill, score]) => (
+                <div key={skill} className="p-4 rounded-xl bg-slate-900 border border-slate-800 flex flex-col justify-between">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-xs font-bold text-slate-200">{skill}</span>
+                    <span className={`text-xs font-mono font-bold ${
+                      score >= 80 ? 'text-emerald-400' : score >= 60 ? 'text-indigo-400' : 'text-amber-400'
+                    }`}>
+                      {score}%
+                    </span>
+                  </div>
+                  <div className="w-full h-1.5 rounded-full bg-slate-800 overflow-hidden mb-1">
+                    <div
+                      className={`h-full rounded-full ${
+                        score >= 80 ? 'bg-emerald-500' : score >= 60 ? 'bg-indigo-500' : 'bg-amber-500'
+                      }`}
+                      style={{ width: `${score}%` }}
+                    />
+                  </div>
+                  <span className="text-[10px] text-slate-500">
+                    {score >= 80 ? 'Strength' : score >= 60 ? 'Competent' : 'Focus Area'}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Strengths & Weaknesses Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Strengths */}
+          <div className="p-6 rounded-2xl bg-emerald-500/5 border border-emerald-500/20">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-4 flex items-center space-x-2">
+              <CheckCircle2 className="h-4 w-4" />
+              <span>Key Strengths Identified</span>
+            </h4>
+            <ul className="space-y-2.5">
+              {report.strengths.map((str, idx) => (
+                <li key={idx} className="text-xs sm:text-sm text-slate-200 flex items-start space-x-2.5">
+                  <span className="text-emerald-400 font-bold shrink-0 mt-0.5">✓</span>
+                  <span className="leading-relaxed">{str}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Weaknesses */}
+          <div className="p-6 rounded-2xl bg-rose-500/5 border border-rose-500/20">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-rose-400 mb-4 flex items-center space-x-2">
+              <AlertTriangle className="h-4 w-4" />
+              <span>Identified Knowledge Gaps</span>
+            </h4>
+            <ul className="space-y-2.5">
+              {report.weaknesses.map((weak, idx) => (
+                <li key={idx} className="text-xs sm:text-sm text-slate-200 flex items-start space-x-2.5">
+                  <span className="text-rose-400 font-bold shrink-0 mt-0.5">!</span>
+                  <span className="leading-relaxed">{weak}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        {/* Question-by-Question Audit Trail */}
+        <div>
+          <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400 mb-4 flex items-center space-x-2">
+            <BookOpen className="h-4 w-4 text-brand-400" />
+            <span>Question-by-Question Audit Log</span>
+          </h3>
+
+          <div className="space-y-4">
+            {report.questionEvaluations.map((item, idx) => (
+              <div key={idx} className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3">
+                  <div className="flex items-center space-x-2">
+                    <span className="px-2 py-0.5 rounded text-xs font-mono font-bold bg-brand-500/10 text-brand-300 border border-brand-500/20">
+                      Q{item.questionNumber}
+                    </span>
+                    <span className="text-xs font-medium text-slate-300">
+                      {item.skill}
+                    </span>
+                    <span className="text-[10px] uppercase font-semibold px-2 py-0.5 rounded bg-slate-800 text-slate-400">
+                      {item.difficulty}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center space-x-1.5 font-mono text-xs font-bold">
+                    <span className="text-slate-400">Score:</span>
+                    <span className={item.score >= 8 ? 'text-emerald-400' : item.score >= 5 ? 'text-indigo-400' : 'text-amber-400'}>
+                      {item.score} / 10
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <h5 className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-1">
+                    Question
+                  </h5>
+                  <p className="text-sm text-white font-medium">{item.questionText}</p>
+                </div>
+
+                <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80">
+                  <h5 className="text-[11px] font-bold text-slate-400 uppercase tracking-wide mb-1">
+                    Candidate's Answer
+                  </h5>
+                  <p className="text-xs text-slate-300 font-sans leading-relaxed whitespace-pre-wrap">
+                    {item.candidateAnswer}
+                  </p>
+                </div>
+
+                <div className="text-xs text-slate-300 bg-brand-500/5 p-3 rounded-xl border border-brand-500/10">
+                  <strong className="text-brand-300 block mb-0.5">Interviewer Evaluation:</strong>
+                  {item.feedback}
+                </div>
+
+                {item.keyMissedPoints && item.keyMissedPoints.length > 0 && (
+                  <div className="flex items-center space-x-2 text-[11px] text-amber-300">
+                    <span className="font-semibold text-slate-400">Missed Concepts:</span>
+                    <span>{item.keyMissedPoints.join(', ')}</span>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Recommended Topics for Study */}
+        {report.recommendedTopics && report.recommendedTopics.length > 0 && (
+          <div>
+            <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center space-x-2">
+              <Target className="h-4 w-4 text-brand-400" />
+              <span>Recommended Study Topics (Placement Focus)</span>
+            </h3>
+            <div className="flex flex-wrap gap-2.5">
+              {report.recommendedTopics.map((topic, idx) => (
+                <div
+                  key={idx}
+                  className="px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-800 text-xs font-medium text-slate-200 hover:border-brand-500/40 transition-colors"
+                >
+                  {topic}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Personalized Improvement Plan */}
+        {report.personalizedImprovementPlan && report.personalizedImprovementPlan.length > 0 && (
+          <div>
+            <h3 className="text-sm font-bold uppercase tracking-wider text-slate-400 mb-4 flex items-center space-x-2">
+              <TrendingUp className="h-4 w-4 text-brand-400" />
+              <span>Personalized Candidate Improvement Roadmap</span>
+            </h3>
+
+            <div className="space-y-3">
+              {report.personalizedImprovementPlan.map((step, idx) => (
+                <div key={idx} className="p-4 rounded-xl bg-slate-900 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="space-y-1">
+                    <div className="flex items-center space-x-2">
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                        step.priority === 'High'
+                          ? 'bg-rose-500/10 text-rose-300 border border-rose-500/30'
+                          : step.priority === 'Medium'
+                          ? 'bg-amber-500/10 text-amber-300 border border-amber-500/30'
+                          : 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/30'
+                      }`}>
+                        {step.priority} Priority
+                      </span>
+                      <strong className="text-xs font-bold text-white">{step.area}</strong>
+                    </div>
+                    <p className="text-xs text-slate-300">{step.recommendation}</p>
+                    <p className="text-[11px] text-brand-300 font-mono">Action: {step.suggestedAction}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Footer info */}
+        <div className="pt-6 border-t border-slate-800 text-center text-xs text-slate-500">
+          InterviewPilot AI • Powered by Google Gemini • Ask. Evaluate. Adapt. Improve.
+        </div>
+      </div>
+    </div>
+  );
+};

@@ -1,4 +1,4 @@
-import { geminiService } from '../server/gemini';
+import { geminiService } from './lib/gemini';
 
 function getHeaderApiKey(headers: any): string | undefined {
   const headerKey = headers['x-gemini-key'];

@@ -1,4 +1,4 @@
-import { geminiService } from '../server/gemini';
+import { geminiService } from './lib/gemini';
 
 export default async function handler(req: any, res: any) {
   res.setHeader('Access-Control-Allow-Origin', '*');

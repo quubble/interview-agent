@@ -1,13 +1,11 @@
 import React from 'react';
-import { Sparkles, Key, RotateCcw, Volume2, VolumeX, ShieldCheck } from 'lucide-react';
+import { Sparkles, RotateCcw, Volume2, VolumeX } from 'lucide-react';
 import { InterviewStage } from '../types/interview';
 
 interface NavbarProps {
   stage: InterviewStage;
   currentQuestionIndex: number;
   totalQuestions: number;
-  hasApiKey: boolean;
-  onOpenApiKeyModal: () => void;
   onResetInterview: () => void;
   speechEnabled: boolean;
   onToggleSpeech: () => void;
@@ -17,8 +15,6 @@ export const Navbar: React.FC<NavbarProps> = ({
   stage,
   currentQuestionIndex,
   totalQuestions,
-  hasApiKey,
-  onOpenApiKeyModal,
   onResetInterview,
   speechEnabled,
   onToggleSpeech,
@@ -73,29 +69,6 @@ export const Navbar: React.FC<NavbarProps> = ({
             }`}
           >
             {speechEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
-          </button>
-
-          {/* Gemini API Key status / button */}
-          <button
-            onClick={onOpenApiKeyModal}
-            className={`flex items-center space-x-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition-all ${
-              hasApiKey
-                ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20'
-                : 'border-amber-500/40 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20 animate-pulse-slow'
-            }`}
-            title="Configure Gemini API Key"
-          >
-            {hasApiKey ? (
-              <>
-                <ShieldCheck className="h-3.5 w-3.5 text-emerald-400" />
-                <span className="hidden sm:inline">Gemini Live</span>
-              </>
-            ) : (
-              <>
-                <Key className="h-3.5 w-3.5 text-amber-400" />
-                <span className="hidden sm:inline">Set API Key</span>
-              </>
-            )}
           </button>
 
           {/* Reset / New Interview */}

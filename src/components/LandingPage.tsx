@@ -7,15 +7,12 @@ import {
   Target,
   BarChart3,
   Award,
-  Zap,
   Layers,
   GraduationCap,
 } from 'lucide-react';
 
 interface LandingPageProps {
   onStart: () => void;
-  onOpenApiKeyModal: () => void;
-  hasApiKey: boolean;
 }
 
 const SUPPORTED_SKILLS = [
@@ -26,8 +23,6 @@ const SUPPORTED_SKILLS = [
 
 export const LandingPage: React.FC<LandingPageProps> = ({
   onStart,
-  onOpenApiKeyModal,
-  hasApiKey,
 }) => {
   return (
     <div className="relative overflow-hidden py-12 md:py-20">
@@ -70,16 +65,6 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <span>Start Interview</span>
               <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
             </button>
-
-            {!hasApiKey && (
-              <button
-                onClick={onOpenApiKeyModal}
-                className="w-full sm:w-auto px-6 py-4 rounded-xl bg-slate-900/90 hover:bg-slate-800 border border-slate-700 text-slate-300 hover:text-white font-medium text-sm transition-all flex items-center justify-center space-x-2"
-              >
-                <Zap className="h-4 w-4 text-amber-400" />
-                <span>Configure Gemini Key</span>
-              </button>
-            )}
           </div>
 
           {/* Quick Stats / Highlights */}

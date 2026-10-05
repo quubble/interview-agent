@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   InterviewState,
   CandidateSetup,
@@ -14,7 +14,6 @@ import { SetupModal } from './components/SetupModal';
 import { InterviewSession } from './components/InterviewSession';
 import { AnswerEvaluationCard } from './components/AnswerEvaluationCard';
 import { FinalReport } from './components/FinalReport';
-import { ApiKeyModal } from './components/ApiKeyModal';
 import { ToastContainer, ToastMessage } from './components/Toast';
 
 const INITIAL_STATE: InterviewState = {
@@ -37,25 +36,9 @@ export const App: React.FC = () => {
     return saved || INITIAL_STATE;
   });
 
-  const [hasApiKey, setHasApiKey] = useState(false);
-  const [isApiKeyModalOpen, setIsApiKeyModalOpen] = useState(false);
   const [speechEnabled, setSpeechEnabled] = useState(() => storageService.getVoiceSettings().speechEnabled);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const [adaptiveMessage, setAdaptiveMessage] = useState<string>('Interview calibrated to candidate role and skills.');
-
-  // Check backend health & key status
-  const checkKeyStatus = useCallback(async () => {
-    try {
-      const res = await apiService.checkHealth();
-      setHasApiKey(res.hasGeminiKey || Boolean(storageService.getApiKey()));
-    } catch {
-      setHasApiKey(Boolean(storageService.getApiKey()));
-    }
-  }, []);
-
-  useEffect(() => {
-    checkKeyStatus();
-  }, [checkKeyStatus]);
 
   // Persist state to localStorage
   useEffect(() => {
@@ -392,8 +375,6 @@ ${state.finalReport.executiveSummary}`;
         stage={state.stage}
         currentQuestionIndex={state.history.length + (state.stage === 'interviewing' ? 1 : 0)}
         totalQuestions={state.candidate?.numberOfQuestions || 0}
-        hasApiKey={hasApiKey}
-        onOpenApiKeyModal={() => setIsApiKeyModalOpen(true)}
         onResetInterview={() => handleResetInterview()}
         speechEnabled={speechEnabled}
         onToggleSpeech={handleToggleSpeech}
@@ -404,8 +385,6 @@ ${state.finalReport.executiveSummary}`;
         {state.stage === 'landing' && (
           <LandingPage
             onStart={handleStartSetup}
-            onOpenApiKeyModal={() => setIsApiKeyModalOpen(true)}
-            hasApiKey={hasApiKey}
           />
         )}
 
@@ -450,14 +429,6 @@ ${state.finalReport.executiveSummary}`;
           />
         )}
       </main>
-
-      {/* API Key Modal */}
-      <ApiKeyModal
-        isOpen={isApiKeyModalOpen}
-        onClose={() => setIsApiKeyModalOpen(false)}
-        hasEnvKey={hasApiKey}
-        onKeyUpdated={checkKeyStatus}
-      />
 
       {/* Toast Notification Container */}
       <ToastContainer toasts={toasts} onDismiss={removeToast} />

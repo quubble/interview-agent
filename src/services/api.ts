@@ -1,4 +1,3 @@
-import { storageService } from './storage';
 import {
   Question,
   AnswerEvaluation,
@@ -9,49 +8,21 @@ import {
 // Use relative API path (works both with Vite proxy in dev and same-origin in prod)
 const API_BASE = '/api';
 
-function getHeaders(): Record<string, string> {
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-  };
-  const key = storageService.getApiKey();
-  if (key) {
-    headers['x-gemini-key'] = key;
-  }
-  return headers;
-}
+const defaultHeaders = {
+  'Content-Type': 'application/json',
+};
 
 export const apiService = {
   async checkHealth(): Promise<{ status: string; hasGeminiKey: boolean; model: string }> {
     try {
       const response = await fetch(`${API_BASE}/health`, {
-        headers: getHeaders(),
+        headers: defaultHeaders,
       });
       if (!response.ok) throw new Error('Health check failed');
       return await response.json();
     } catch (err) {
       console.warn('API health check error:', err);
       return { status: 'offline', hasGeminiKey: false, model: 'local' };
-    }
-  },
-
-  async verifyGemini(apiKey?: string): Promise<{ success: boolean; message: string; model?: string; sampleResponse?: string; error?: string }> {
-    try {
-      const headers = getHeaders();
-      if (apiKey) {
-        headers['x-gemini-key'] = apiKey;
-      }
-      const response = await fetch(`${API_BASE}/verify-gemini`, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ apiKey }),
-      });
-      return await response.json();
-    } catch (err: any) {
-      return {
-        success: false,
-        message: 'Could not connect to server verification endpoint.',
-        error: err?.message || String(err),
-      };
     }
   },
 
@@ -70,7 +41,7 @@ export const apiService = {
   }): Promise<{ question: Question; source: 'gemini' | 'fallback' }> {
     const response = await fetch(`${API_BASE}/generate-question`, {
       method: 'POST',
-      headers: getHeaders(),
+      headers: defaultHeaders,
       body: JSON.stringify(params),
     });
 
@@ -97,7 +68,7 @@ export const apiService = {
   }): Promise<{ evaluation: AnswerEvaluation; source: 'gemini' | 'fallback' }> {
     const response = await fetch(`${API_BASE}/evaluate-answer`, {
       method: 'POST',
-      headers: getHeaders(),
+      headers: defaultHeaders,
       body: JSON.stringify(params),
     });
 
@@ -130,7 +101,7 @@ export const apiService = {
   }): Promise<{ report: FinalAssessmentReport; source: 'gemini' | 'fallback' }> {
     const response = await fetch(`${API_BASE}/generate-report`, {
       method: 'POST',
-      headers: getHeaders(),
+      headers: defaultHeaders,
       body: JSON.stringify(params),
     });
 

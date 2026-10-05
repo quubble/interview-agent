@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { X, Key, ShieldCheck, ExternalLink, Check, AlertCircle } from 'lucide-react';
+import { X, Key, ShieldCheck, ExternalLink, Check, AlertCircle, Loader2 } from 'lucide-react';
 import { storageService } from '../services/storage';
+import { apiService } from '../services/api';
 
 interface ApiKeyModalProps {
   isOpen: boolean;
@@ -17,8 +18,31 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({
 }) => {
   const [apiKey, setApiKey] = useState(storageService.getApiKey());
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [isTesting, setIsTesting] = useState(false);
+  const [testResult, setTestResult] = useState<{ success: boolean; message: string } | null>(null);
 
   if (!isOpen) return null;
+
+  const handleTestConnection = async () => {
+    setIsTesting(true);
+    setTestResult(null);
+    try {
+      const res = await apiService.verifyGemini(apiKey.trim() || undefined);
+      setTestResult({
+        success: res.success,
+        message: res.success
+          ? 'Live Gemini 1.5 Flash connection confirmed successfully!'
+          : (res.error || res.message || 'Connection test failed'),
+      });
+    } catch (err: any) {
+      setTestResult({
+        success: false,
+        message: err?.message || 'Failed to reach server verification endpoint.',
+      });
+    } finally {
+      setIsTesting(false);
+    }
+  };
 
   const handleSave = () => {
     storageService.saveApiKey(apiKey.trim());
@@ -33,6 +57,7 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({
   const handleClear = () => {
     storageService.removeApiKey();
     setApiKey('');
+    setTestResult(null);
     onKeyUpdated();
   };
 
@@ -120,29 +145,66 @@ export const ApiKeyModal: React.FC<ApiKeyModalProps> = ({
           </div>
         </div>
 
+        {/* Live Test Feedback Banner */}
+        {testResult && (
+          <div className={`mb-4 p-3 rounded-xl border text-xs flex items-start space-x-2 ${
+            testResult.success
+              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-300'
+              : 'bg-rose-500/10 border-rose-500/30 text-rose-300'
+          }`}>
+            {testResult.success ? (
+              <Check className="h-4 w-4 text-emerald-400 shrink-0 mt-0.5" />
+            ) : (
+              <AlertCircle className="h-4 w-4 text-rose-400 shrink-0 mt-0.5" />
+            )}
+            <div className="leading-snug break-words">
+              <strong>{testResult.success ? 'Success: ' : 'Error: '}</strong>
+              <span>{testResult.message}</span>
+            </div>
+          </div>
+        )}
+
         {/* Buttons */}
-        <div className="flex items-center justify-end space-x-3">
+        <div className="flex items-center justify-between pt-2 border-t border-slate-800">
           <button
             type="button"
-            onClick={onClose}
-            className="px-4 py-2 text-xs font-medium text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors"
+            onClick={handleTestConnection}
+            disabled={isTesting}
+            className="px-3.5 py-2 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors flex items-center space-x-1.5 disabled:opacity-50"
           >
-            Cancel
-          </button>
-          <button
-            type="button"
-            onClick={handleSave}
-            className="px-5 py-2 text-xs font-semibold rounded-lg bg-brand-600 hover:bg-brand-500 text-white shadow-lg shadow-brand-600/20 transition-all flex items-center space-x-1.5"
-          >
-            {savedSuccess ? (
+            {isTesting ? (
               <>
-                <Check className="h-4 w-4" />
-                <span>Saved!</span>
+                <Loader2 className="h-3.5 w-3.5 animate-spin text-brand-400" />
+                <span>Testing API...</span>
               </>
             ) : (
-              <span>Save & Apply</span>
+              <span>Test Live Key</span>
             )}
           </button>
+
+          <div className="flex items-center space-x-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-3.5 py-2 text-xs font-medium text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleSave}
+              className="px-5 py-2 text-xs font-semibold rounded-lg bg-brand-600 hover:bg-brand-500 text-white shadow-lg shadow-brand-600/20 transition-all flex items-center space-x-1.5"
+            >
+              {savedSuccess ? (
+                <>
+                  <Check className="h-4 w-4" />
+                  <span>Saved!</span>
+                </>
+              ) : (
+                <span>Save & Apply</span>
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </div>

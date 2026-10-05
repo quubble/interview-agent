@@ -33,6 +33,43 @@ export class GeminiInterviewService {
     return Boolean(key && key.trim() !== '' && !key.includes('YOUR_GEMINI_API_KEY'));
   }
 
+  public async verifyConnection(customKey?: string): Promise<{
+    success: boolean;
+    model: string;
+    message: string;
+    sampleResponse?: string;
+    error?: string;
+  }> {
+    const client = this.getClient(customKey);
+    if (!client) {
+      return {
+        success: false,
+        model: 'gemini-1.5-flash',
+        message: 'No GEMINI_API_KEY found in .env or request header.',
+      };
+    }
+
+    try {
+      const model = client.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      const prompt = 'You are InterviewPilot AI. Confirm connection with JSON: {"status":"connected","engine":"Gemini 1.5 Flash","ready":true}';
+      const result = await model.generateContent(prompt);
+      const text = result.response.text();
+      return {
+        success: true,
+        model: 'gemini-1.5-flash',
+        message: 'Gemini API connection established successfully.',
+        sampleResponse: text.trim(),
+      };
+    } catch (err: any) {
+      return {
+        success: false,
+        model: 'gemini-1.5-flash',
+        message: 'Gemini API call encountered an error.',
+        error: err?.message || String(err),
+      };
+    }
+  }
+
   public async generateQuestion(params: {
     candidateName: string;
     targetRole: string;

@@ -38,6 +38,21 @@ app.get('/api/health', (req: Request, res: Response) => {
   });
 });
 
+// Endpoint: Verify Gemini API connectivity
+app.post('/api/verify-gemini', async (req: Request, res: Response) => {
+  try {
+    const customKey = getHeaderApiKey(req) || req.body?.apiKey;
+    const result = await geminiService.verifyConnection(customKey);
+    return res.status(result.success ? 200 : 400).json(result);
+  } catch (error: any) {
+    return res.status(500).json({
+      success: false,
+      message: 'Unexpected error verifying Gemini API',
+      error: error?.message || String(error),
+    });
+  }
+});
+
 // Endpoint: Generate Next Question
 app.post('/api/generate-question', async (req: Request, res: Response) => {
   try {

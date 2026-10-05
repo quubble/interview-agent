@@ -10,6 +10,7 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "test": "tsx test-qa-flow.ts",
+    "verify:gemini": "tsx verify-gemini.ts",
     "start": "tsx server/index.ts"
   },
   "dependencies": {

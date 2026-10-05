@@ -34,6 +34,27 @@ export const apiService = {
     }
   },
 
+  async verifyGemini(apiKey?: string): Promise<{ success: boolean; message: string; model?: string; sampleResponse?: string; error?: string }> {
+    try {
+      const headers = getHeaders();
+      if (apiKey) {
+        headers['x-gemini-key'] = apiKey;
+      }
+      const response = await fetch(`${API_BASE}/verify-gemini`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ apiKey }),
+      });
+      return await response.json();
+    } catch (err: any) {
+      return {
+        success: false,
+        message: 'Could not connect to server verification endpoint.',
+        error: err?.message || String(err),
+      };
+    }
+  },
+
   async generateQuestion(params: {
     candidateName: string;
     targetRole: string;

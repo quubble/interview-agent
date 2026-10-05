@@ -59,6 +59,7 @@ export const SetupModal: React.FC<SetupModalProps> = ({
   const [targetRole, setTargetRole] = useState('Software Development Engineer (Fresher)');
   const [experienceLevel, setExperienceLevel] = useState<ExperienceLevel>('Fresher / MCA Student');
   const [selectedSkills, setSelectedSkills] = useState<string[]>([
+    'Python',
     'Data Structures',
     'Algorithms',
     'DBMS',

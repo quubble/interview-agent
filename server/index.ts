@@ -25,8 +25,10 @@ function getHeaderApiKey(req: Request): string | undefined {
   return undefined;
 }
 
+const apiRouter = express.Router();
+
 // Health & Status check
-app.get('/api/health', (req: Request, res: Response) => {
+apiRouter.get('/health', (req: Request, res: Response) => {
   const headerKey = getHeaderApiKey(req);
   const hasEnvKey = geminiService.hasApiKey(headerKey);
   res.json({
@@ -39,7 +41,7 @@ app.get('/api/health', (req: Request, res: Response) => {
 });
 
 // Endpoint: Verify Gemini API connectivity
-app.post('/api/verify-gemini', async (req: Request, res: Response) => {
+apiRouter.post('/verify-gemini', async (req: Request, res: Response) => {
   try {
     const customKey = getHeaderApiKey(req) || req.body?.apiKey;
     const result = await geminiService.verifyConnection(customKey);
@@ -54,7 +56,7 @@ app.post('/api/verify-gemini', async (req: Request, res: Response) => {
 });
 
 // Endpoint: Generate Next Question
-app.post('/api/generate-question', async (req: Request, res: Response) => {
+apiRouter.post('/generate-question', async (req: Request, res: Response) => {
   try {
     const customApiKey = getHeaderApiKey(req);
     const {
@@ -101,7 +103,7 @@ app.post('/api/generate-question', async (req: Request, res: Response) => {
 });
 
 // Endpoint: Evaluate Candidate Answer
-app.post('/api/evaluate-answer', async (req: Request, res: Response) => {
+apiRouter.post('/evaluate-answer', async (req: Request, res: Response) => {
   try {
     const customApiKey = getHeaderApiKey(req);
     const {
@@ -138,7 +140,7 @@ app.post('/api/evaluate-answer', async (req: Request, res: Response) => {
 });
 
 // Endpoint: Generate Comprehensive Final Assessment Report
-app.post('/api/generate-report', async (req: Request, res: Response) => {
+apiRouter.post('/generate-report', async (req: Request, res: Response) => {
   try {
     const customApiKey = getHeaderApiKey(req);
     const {
@@ -176,18 +178,24 @@ app.post('/api/generate-report', async (req: Request, res: Response) => {
   }
 });
 
-// Serve static frontend in production
-if (process.env.NODE_ENV === 'production') {
-  const distPath = path.resolve(__dirname, '../dist');
-  app.use(express.static(distPath));
-  app.get('*', (_req: Request, res: Response) => {
-    res.sendFile(path.join(distPath, 'index.html'));
+// Mount router on both /api (standard) and / (serverless rewrites)
+app.use('/api', apiRouter);
+app.use('/', apiRouter);
+
+// Serve static frontend in standard Node production mode (not in Vercel serverless)
+if (process.env.VERCEL !== '1') {
+  if (process.env.NODE_ENV === 'production') {
+    const distPath = path.resolve(__dirname, '../dist');
+    app.use(express.static(distPath));
+    app.get('*', (_req: Request, res: Response) => {
+      res.sendFile(path.join(distPath, 'index.html'));
+    });
+  }
+
+  app.listen(PORT, () => {
+    console.log(` InterviewPilot AI Server running on port ${PORT}`);
+    console.log(` Gemini API Key status: ${geminiService.hasApiKey() ? 'CONFIGURED (Live Gemini Active)' : 'NOT FOUND (Using Adaptive Fallback Engine)'}`);
   });
 }
-
-app.listen(PORT, () => {
-  console.log(` InterviewPilot AI Server running on port ${PORT}`);
-  console.log(` Gemini API Key status: ${geminiService.hasApiKey() ? 'CONFIGURED (Live Gemini Active)' : 'NOT FOUND (Using Adaptive Fallback Engine)'}`);
-});
 
 export default app;
